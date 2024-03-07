@@ -154,17 +154,36 @@ class App:
 
     def highpass_butterworth_filter(self, D0, n):
         img = self.img_rgb
-        F = np.fft.fft2(img)
-        F = np.fft.fftshift(F)
-        M, N = img.shape
+        M, N, _ = img.shape
         u = np.arange(0, M) - M / 2
         v = np.arange(0, N) - N / 2
         [V, U] = np.meshgrid(v, u)
         D = np.sqrt(np.power(U, 2) + np.power(V, 2))
         H = 1 / np.power(1 + (D0 / D), (2 * n))
-        G = H * F
-        G = np.fft.ifftshift(G)
-        img_out = np.real(np.fft.ifft2(G))
+
+        b, g, r = cv2.split(img)
+
+        Fb = np.fft.fft2(b)
+        Fb = np.fft.fftshift(Fb)
+        Gb = H * Fb
+        Gb = np.fft.ifftshift(Gb)
+        img_out_b = np.real(np.fft.ifft2(Gb))
+
+        Fg = np.fft.fft2(g)
+        Fg = np.fft.fftshift(Fg)
+        Gg = H * Fg
+        Gg = np.fft.ifftshift(Gg)
+        img_out_g = np.real(np.fft.ifft2(Gg))
+
+        Fr = np.fft.fft2(r)
+        Fr = np.fft.fftshift(Fr)
+        Gr = H * Fr
+        Gr = np.fft.ifftshift(Gr)
+        img_out_r = np.real(np.fft.ifft2(Gr))
+
+        img_out = cv2.merge((img_out_b, img_out_g, img_out_r))
+        img_out = np.clip(img_out, 0, 255).astype(np.uint8)
+
         self.display_transformed_img(img_out)
 
     def highpass_butterworth_change_D0(self, value):
@@ -179,64 +198,140 @@ class App:
     def highpass_gauss_filter(self, value):
         D0 = float(value)
         img = self.img_rgb
-        F = np.fft.fft2(img)
-        F = np.fft.fftshift(F)
-        M, N = img.shape
+        M, N, _ = img.shape
         u = np.arange(0, M) - M / 2
         v = np.arange(0, N) - N / 2
         [V, U] = np.meshgrid(v, u)
         D = np.sqrt(np.power(U, 2) + np.power(V, 2))
         H = 1 - np.exp((-1 * np.square(D)) / (2 * D0 ** 2))
-        G = H * F
-        G = np.fft.ifftshift(G)
-        img_out = np.real(np.fft.ifft2(G))
+
+        b, g, r = cv2.split(img)
+
+        Fb = np.fft.fft2(b)
+        Fb = np.fft.fftshift(Fb)
+        Gb = H * Fb
+        Gb = np.fft.ifftshift(Gb)
+        img_out_b = np.real(np.fft.ifft2(Gb))
+
+        Fg = np.fft.fft2(g)
+        Fg = np.fft.fftshift(Fg)
+        Gg = H * Fg
+        Gg = np.fft.ifftshift(Gg)
+        img_out_g = np.real(np.fft.ifft2(Gg))
+
+        Fr = np.fft.fft2(r)
+        Fr = np.fft.fftshift(Fr)
+        Gr = H * Fr
+        Gr = np.fft.ifftshift(Gr)
+        img_out_r = np.real(np.fft.ifft2(Gr))
+
+        img_out = cv2.merge((img_out_b, img_out_g, img_out_r))
+        img_out = np.clip(img_out, 0, 255).astype(np.uint8)
+
         self.display_transformed_img(img_out)
 
     def highpass_ideal_filter(self, value):
         D0 = float(value)
         img = self.img_rgb
-        F = np.fft.fft2(img)
-        F = np.fft.fftshift(F)
-        M, N = img.shape
+        M, N, _ = img.shape
         u = np.arange(0, M) - M / 2
         v = np.arange(0, N) - N / 2
         [V, U] = np.meshgrid(v, u)
         D = np.sqrt(np.power(U, 2) + np.power(V, 2))
         H = np.array(D > D0, 'float')
-        G = H * F
-        G = np.fft.ifftshift(G)
-        img_out = np.real(np.fft.ifft2(G))
+
+        b, g, r = cv2.split(img)
+
+        Fb = np.fft.fft2(b)
+        Fb = np.fft.fftshift(Fb)
+        Gb = H * Fb
+        Gb = np.fft.ifftshift(Gb)
+        img_out_b = np.real(np.fft.ifft2(Gb))
+
+        Fg = np.fft.fft2(g)
+        Fg = np.fft.fftshift(Fg)
+        Gg = H * Fg
+        Gg = np.fft.ifftshift(Gg)
+        img_out_g = np.real(np.fft.ifft2(Gg))
+
+        Fr = np.fft.fft2(r)
+        Fr = np.fft.fftshift(Fr)
+        Gr = H * Fr
+        Gr = np.fft.ifftshift(Gr)
+        img_out_r = np.real(np.fft.ifft2(Gr))
+
+        img_out = cv2.merge((img_out_b, img_out_g, img_out_r))
+        img_out = np.clip(img_out, 0, 255).astype(np.uint8)
+
         self.display_transformed_img(img_out)
 
     def lowpass_gauss_filter(self, value):
         img = self.img_rgb
-        F = np.fft.fft2(img)
-        F = np.fft.fftshift(F)
-        M, N = img.shape
+        M, N, _ = img.shape
         D0 = float(value)
         u = np.arange(0, M) - M / 2
         v = np.arange(0, N) - N / 2
         [V, U] = np.meshgrid(v, u)
         D = np.sqrt(np.power(U, 2) + np.power(V, 2))
         H = np.exp((-1 * np.square(D)) / (2 * D0 ** 2))
-        G = H * F
-        G = np.fft.ifftshift(G)
-        img_out = np.real(np.fft.ifft2(G))
+
+        b, g, r = cv2.split(img)
+
+        Fb = np.fft.fft2(b)
+        Fb = np.fft.fftshift(Fb)
+        Gb = H * Fb
+        Gb = np.fft.ifftshift(Gb)
+        img_out_b = np.real(np.fft.ifft2(Gb))
+
+        Fg = np.fft.fft2(g)
+        Fg = np.fft.fftshift(Fg)
+        Gg = H * Fg
+        Gg = np.fft.ifftshift(Gg)
+        img_out_g = np.real(np.fft.ifft2(Gg))
+
+        Fr = np.fft.fft2(r)
+        Fr = np.fft.fftshift(Fr)
+        Gr = H * Fr
+        Gr = np.fft.ifftshift(Gr)
+        img_out_r = np.real(np.fft.ifft2(Gr))
+
+        img_out = cv2.merge((img_out_b, img_out_g, img_out_r))
+        img_out = np.clip(img_out, 0, 255).astype(np.uint8)
+
         self.display_transformed_img(img_out)
 
     def lowpass_butterworth_filter(self, D0, n):
         img = self.img_rgb
-        F = np.fft.fft2(img)
-        F = np.fft.fftshift(F)
-        M, N = img.shape
+        M, N, _ = img.shape
         u = np.arange(0, M) - M / 2
         v = np.arange(0, N) - N / 2
         [V, U] = np.meshgrid(v, u)
         D = np.sqrt(np.power(U, 2) + np.power(V, 2))
         H = 1 / np.power(1 + (D / D0), (2 * n))
-        G = H * F
-        G = np.fft.ifftshift(G)
-        img_out = np.real(np.fft.ifft2(G))
+
+        b, g, r = cv2.split(img)
+
+        Fb = np.fft.fft2(b)
+        Fb = np.fft.fftshift(Fb)
+        Gb = H * Fb
+        Gb = np.fft.ifftshift(Gb)
+        img_out_b = np.real(np.fft.ifft2(Gb))
+
+        Fg = np.fft.fft2(g)
+        Fg = np.fft.fftshift(Fg)
+        Gg = H * Fg
+        Gg = np.fft.ifftshift(Gg)
+        img_out_g = np.real(np.fft.ifft2(Gg))
+
+        Fr = np.fft.fft2(r)
+        Fr = np.fft.fftshift(Fr)
+        Gr = H * Fr
+        Gr = np.fft.ifftshift(Gr)
+        img_out_r = np.real(np.fft.ifft2(Gr))
+
+        img_out = cv2.merge((img_out_b, img_out_g, img_out_r))
+        img_out = np.clip(img_out, 0, 255).astype(np.uint8)
+
         self.display_transformed_img(img_out)
 
     def lowpass_butterworth_change_n(self, value):
@@ -252,17 +347,36 @@ class App:
     def lowpass_ideal_filter(self, value):
         D0 = float(value)
         img = self.img_rgb
-        F = np.fft.fft2(img)
-        F = np.fft.fftshift(F)
-        M, N= img.shape
+        M, N, _ = img.shape
         u = np.arange(0, M) - M / 2
         v = np.arange(0, N) - N / 2
         [V, U] = np.meshgrid(v, u)
         D = np.sqrt(np.power(U, 2) + np.power(V, 2))
         H = np.array(D <= D0, 'float')
-        G = H * F
-        G = np.fft.ifftshift(G)
-        img_out = np.real(np.fft.ifft2(G))
+
+        b, g, r = cv2.split(img)
+
+        Fb = np.fft.fft2(b)
+        Fb = np.fft.fftshift(Fb)
+        Gb = H * Fb
+        Gb = np.fft.ifftshift(Gb)
+        img_out_b = np.real(np.fft.ifft2(Gb))
+
+        Fg = np.fft.fft2(g)
+        Fg = np.fft.fftshift(Fg)
+        Gg = H * Fg
+        Gg = np.fft.ifftshift(Gg)
+        img_out_g = np.real(np.fft.ifft2(Gg))
+
+        Fr = np.fft.fft2(r)
+        Fr = np.fft.fftshift(Fr)
+        Gr = H * Fr
+        Gr = np.fft.ifftshift(Gr)
+        img_out_r = np.real(np.fft.ifft2(Gr))
+
+        img_out = cv2.merge((img_out_b, img_out_g, img_out_r))
+        img_out = np.clip(img_out, 0, 255).astype(np.uint8)
+
         self.display_transformed_img(img_out)
 
     def update_image(self):
@@ -271,10 +385,8 @@ class App:
 
     def save_image(self):
         image = self.transformed_img
-        # Hiển thị hộp thoại "Lưu" để chọn nơi lưu và đặt tên file
         file_path = filedialog.asksaveasfilename(defaultextension=".png",
                                                  filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
-        # Kiểm tra nếu người dùng đã chọn nơi lưu và đặt tên file
         if file_path:
             # Lưu hình ảnh ra file
             cv2.imwrite(file_path, image)
@@ -290,8 +402,8 @@ class App:
         for widget in self.ori_img_canvas.winfo_children():
             widget.destroy()
 
-        img_origin = cv2.imread(image_path, 0)
-        #img_origin = cv2.cvtColor(img_origin, cv2.COLOR_BGR2RGB)
+        img_origin = cv2.imread(image_path)
+        img_origin = cv2.cvtColor(img_origin, cv2.COLOR_BGR2RGB)
         self.img_rgb = img_origin
         width_img = self.ori_img_canvas.winfo_width()
         height_img = self.ori_img_canvas.winfo_height()
