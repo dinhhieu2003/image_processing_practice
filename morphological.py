@@ -13,15 +13,15 @@ class App:
         self.img_path = ""
 
         # Left frame
-        self.left_frame = tk.Frame(root, width=self.screen_width/2, bg="red")
+        self.left_frame = tk.Frame(root, width=self.screen_width/3, bg="red")
         self.left_frame.pack(side='left', padx=5, fill=tk.BOTH)
 
         ## original image
-        self.ori_img_canvas = tk.Canvas(self.left_frame, width=self.screen_width/2, bg="green")
+        self.ori_img_canvas = tk.Canvas(self.left_frame, width=self.screen_width/3, bg="green")
         print(self.screen_width/2)
         self.ori_img_canvas.pack(fill=tk.BOTH, expand=True)
 
-        self.trans_img_canvas = tk.Canvas(self.left_frame, width=self.screen_width/2, bg="yellow")
+        self.trans_img_canvas = tk.Canvas(self.left_frame, width=self.screen_width/3, bg="yellow")
         self.trans_img_canvas.pack(fill=tk.BOTH, expand=True)
 
         # Right frame
