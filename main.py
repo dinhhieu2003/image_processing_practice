@@ -19,10 +19,10 @@ class App:
         ## original image
         self.ori_img_canvas = tk.Canvas(self.left_frame, width=self.screen_width/2, bg="green")
         print(self.screen_width/2)
-        self.ori_img_canvas.pack(fill=tk.BOTH, expand=True);
+        self.ori_img_canvas.pack(fill=tk.BOTH, expand=True)
 
         self.trans_img_canvas = tk.Canvas(self.left_frame, width=self.screen_width/2, bg="yellow")
-        self.trans_img_canvas.pack(fill=tk.BOTH, expand=True);
+        self.trans_img_canvas.pack(fill=tk.BOTH, expand=True)
 
         # Right frame
         self.right_frame = tk.Frame(root, width=self.screen_width/2, height=(self.screen_height/10)*6, bg='white')
@@ -46,7 +46,7 @@ class App:
         self.log_scale = tk.Scale(self.log_panel, orient=tk.HORIZONTAL, resolution=0.1, width=width_scale, length=500, command=self.log_trans)
         self.log_scale.pack(side=tk.LEFT, anchor='nw')
 
-        # Piecewise panel
+        # Piecewise panel (gray level slicing)
         self.piecewise_panel = tk.LabelFrame(self.right_frame, text='Biến đổi Piecewise-Linear', bg='#a29bfe', font=font_panel)
         self.piecewise_panel.pack(fill=tk.BOTH, expand=True, pady=5, padx=5)
         # # Hệ số cao
@@ -56,7 +56,7 @@ class App:
         self.highweight_label = tk.Label(self.highweight_scale_frame, text='Hệ số cao', font=font_panel, bg='#a29bfe')
         self.highweight_label.pack(side=tk.LEFT, anchor='nw', padx=10)
 
-        self.highweight_scale = tk.Scale(self.highweight_scale_frame, orient=tk.HORIZONTAL, resolution=0.1, width=width_scale, length=500)
+        self.highweight_scale = tk.Scale(self.highweight_scale_frame, orient=tk.HORIZONTAL, resolution=1, to=200, width=width_scale, length=500)
         self.highweight_scale.pack(side=tk.LEFT, anchor='nw')
         # # Hệ số thấp
         self.lowweight_scale_frame = tk.Frame(self.piecewise_panel, bg='#a29bfe')
@@ -65,8 +65,15 @@ class App:
         self.lowweight_label = tk.Label(self.lowweight_scale_frame, text='Hệ số thấp', font=font_panel, bg='#a29bfe')
         self.lowweight_label.pack(side=tk.LEFT, padx=10, anchor='nw')
 
-        self.lowweight_scale = tk.Scale(self.lowweight_scale_frame, orient=tk.HORIZONTAL, resolution=0.1, width=width_scale, length=500)
+        self.lowweight_scale = tk.Scale(self.lowweight_scale_frame, orient=tk.HORIZONTAL, resolution=1, to=200,width=width_scale, length=500)
         self.lowweight_scale.pack(side=tk.LEFT, anchor='nw')
+
+        # # button submit
+        self.piecewise_button_frame = tk.Frame(self.piecewise_panel, bg='#a29bfe')
+        self.piecewise_button_frame.pack(anchor='nw')
+
+        self.piecewise_button = tk.Button(self.piecewise_button_frame, text="Xác nhận", width=10, command=self.piecewise_submit, font=('Comic Sans MS', 8), bg="#fd79a8")
+        self.piecewise_button.pack(side=tk.LEFT, pady=5)
 
         # Gamma trans
         self.gamma_panel = tk.LabelFrame(self.right_frame, text='Biến đổi Gamma', bg='#ffbe76', font=font_panel)
@@ -133,14 +140,14 @@ class App:
         self.medfilter_scale.pack(side=tk.LEFT, anchor='nw')
 
         # Cân bằng sáng dùng histogram
-        self.brightness_balancing_panel = tk.LabelFrame(self.right_frame, text='Cân bằng sáng dùng histogram', bg='#81ecec', font=font_panel)
-        self.brightness_balancing_panel.pack(fill=tk.BOTH, expand=True, pady=5, padx=5)
-
-        self.brightness_balancing_label = tk.Label(self.brightness_balancing_panel, text='Kích thước lọc', font=font_panel, bg='#81ecec')
-        self.brightness_balancing_label.pack(side=tk.LEFT, anchor='nw', padx=10)
-
-        self.brightness_balancing_scale = tk.Scale(self.brightness_balancing_panel, orient=tk.HORIZONTAL, resolution=0.1, width=width_scale, length=500)
-        self.brightness_balancing_scale.pack(side=tk.LEFT, anchor='nw')
+        # self.brightness_balancing_panel = tk.LabelFrame(self.right_frame, text='Cân bằng sáng dùng histogram', bg='#81ecec', font=font_panel)
+        # self.brightness_balancing_panel.pack(fill=tk.BOTH, expand=True, pady=5, padx=5)
+        #
+        # self.brightness_balancing_label = tk.Label(self.brightness_balancing_panel, text='Kích thước lọc', font=font_panel, bg='#81ecec')
+        # self.brightness_balancing_label.pack(side=tk.LEFT, anchor='nw', padx=10)
+        #
+        # self.brightness_balancing_scale = tk.Scale(self.brightness_balancing_panel, orient=tk.HORIZONTAL, resolution=0.1, width=width_scale, length=500)
+        # self.brightness_balancing_scale.pack(side=tk.LEFT, anchor='nw')
 
         # Button frame
         self.button_frame = tk.Frame(root, width=self.screen_width/2, bg='white')
@@ -162,6 +169,23 @@ class App:
         # close
         self.close_button = tk.Button(self.button_frame, text="Đóng ảnh", width=15, command='', font=font_button, bg=bg_button)
         self.close_button.pack(side=tk.LEFT, pady=10, padx=self.gap)
+
+
+    def piecewise_submit(self):
+        h = self.highweight_scale.get()
+        l = self.lowweight_scale.get()
+        self.piecewise_gray_level_slicing(h, l)
+
+    def piecewise_gray_level_slicing(self, h, l):
+        img = np.array(self.img_gray)
+        rows, columns = img.shape
+        for r in range(rows):
+            for c in range(columns):
+                if l <= img[r, c] <= h:
+                    img[r, c] = 255
+                else :
+                    img[r, c] = 0
+        self.display_transformed_img(img)
 
     def Gausskernel(self, l, sig):
         s = round((l - 1) / 2)
@@ -233,11 +257,21 @@ class App:
 
     def log_trans(self, value):
         c = float(value)
-        #c = 255 / (np.log(1 + np.max(self.img_rgb)))
         img = np.array(self.img_rgb, dtype=float)
         log_img = c * np.log(img + 1)
-        log_img = np.array(log_img, dtype=np.uint8)
+        #log_img = np.array(log_img, dtype=np.uint8)
+        log_img = np.clip(log_img, 0, 255).astype(np.uint8)
         self.display_transformed_img(log_img)
+
+        # b, g, r = cv2.split(self.img_rgb)
+        #
+        # b = np.log1p(b) * c
+        # g = np.log1p(g) * c
+        # r = np.log1p(r) * c
+        #
+        # log_img = cv2.merge((b, g, r))
+        # log_img = np.clip(log_img, 0, 255).astype(np.uint8)
+        # self.display_transformed_img(log_img)
 
     def trans_to_neg_img(self):
         img_bgr = cv2.imread(self.img_path)
@@ -281,6 +315,7 @@ class App:
         img_origin = cv2.imread(image_path)
         img_origin = cv2.cvtColor(img_origin, cv2.COLOR_BGR2RGB)
         self.img_rgb = img_origin
+        self.img_gray = cv2.cvtColor(img_origin, cv2.COLOR_RGB2GRAY)
         width_img = self.ori_img_canvas.winfo_width()
         height_img = self.ori_img_canvas.winfo_height()
         img_origin = cv2.resize(img_origin, (width_img, height_img))
